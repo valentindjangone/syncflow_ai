@@ -1,0 +1,5 @@
+openai==1.1.1
+fastapi==0.100.1
+uvicorn
+python-dotenv
+mysqlclient
