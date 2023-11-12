@@ -144,10 +144,11 @@ def store_processed_mission(mission_dict):
 
         # Préparation et exécution de la requête SQL
         insert_query = """
-            INSERT INTO processed_mission (mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO processed_mission (id, mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(insert_query, (
+            mission_dict["id"],
             mission_dict["name"],
             mission_dict["abstract"],
             mission_dict["detail"],
