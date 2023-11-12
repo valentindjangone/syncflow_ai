@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import syncflowai
-from syncflowai import to_db
 import MySQLdb
 
 
@@ -30,14 +29,14 @@ class Mission(BaseModel):
 @api.post("/extract_all_details")
 async def extract_mission_details(mission: Mission, include_raw: bool = False):
     try:
-        mission_details, raw_response = syncflowai.extract_mission_details(mission.mission)
-        to_db(mission_details)
-        
+        processed_mission, raw_response = syncflowai.extract_mission_details(mission.mission)
+        syncflowai.store_processed_mission(processed_mission)
+        syncflowai.store_raw_response(raw_response)
         # Retourner mission_details et raw_response si include_raw est True
         if include_raw:
-            return {"mission_details": mission_details, "raw_response": raw_response}
+            return {"processed_mission": processed_mission, "raw_response": raw_response}
         else:
-            return mission_details
+            return processed_mission
         
     except MySQLdb.Error as err:
         raise HTTPException(status_code=503, detail=f"Erreur lors de l'insertion dans la base de données: {err}")

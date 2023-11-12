@@ -1,10 +1,11 @@
 import json
 import openai
 from dotenv import load_dotenv
-load_dotenv()
 import os
 import MySQLdb
+import uuid
 
+load_dotenv()
 
 def extract_mission_details(mission):
     messages = [{
@@ -104,16 +105,18 @@ def extract_mission_details(mission):
     )
 
     raw_response = response.model_dump()
+    raw_response['prompt_cost'] = response.usage.prompt_tokens * 0.01/1000
+    raw_response['completion_cost'] = response.usage.completion_tokens * 0.03/1000
+    raw_response['cost'] = {'prompt' : raw_response['prompt_cost'], 'completion' : raw_response['completion_cost'], 'total' : raw_response['prompt_cost'] + raw_response['completion_cost']}
+    raw_response['id'] = uuid.uuid1()
+
     mission_dict = json.loads(response.model_dump()['choices'][0]['message']['function_call']['arguments'])
-    mission_dict['tokens'] = {"prompt" : response.usage.prompt_tokens, "completion" : response.usage.completion_tokens, "total" :response.usage.total_tokens} 
-    mission_dict['cost'] = response.usage.total_tokens * 0.01/1000
-    mission_dict['time'] = response.created
-    mission_dict['model'] = response.model
-    mission_dict['id_M'] = response.id
+    mission_dict['id'] = uuid.uuid1()
+    mission_dict['metadata_id'] = raw_response['id']
 
     return mission_dict, raw_response
 
-def to_db(mission_dict):
+def store_processed_mission(mission_dict):
     # Récupération des variables d'environnement
     db_host = os.getenv("DATABASE_HOST")
     db_user = os.getenv("DATABASE_USERNAME")
@@ -140,9 +143,73 @@ def to_db(mission_dict):
         cursor = connection.cursor()
 
         # Préparation et exécution de la requête SQL
-        insert_query = "INSERT INTO syncflow_processed_mission (mission_dict) VALUES (%s)"
-        cursor.execute(insert_query, (json.dumps(mission_dict),))
-    
+        insert_query = """
+            INSERT INTO processed_mission (mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, (
+            mission_dict["name"],
+            mission_dict["abstract"],
+            mission_dict["detail"],
+            json.dumps(mission_dict["roles"]), 
+            json.dumps(mission_dict["budget"]),
+            mission_dict["metadata_id"]
+        ))
+
+    except MySQLdb.Error as err:
+        raise err
+
+    finally:
+        # Fermeture de la connexion à la base de données
+        if connection and connection.open:
+            cursor.close()
+            connection.close()
+
+def store_raw_response(raw_response):
+    # Récupération des variables d'environnement
+    db_host = os.getenv("DATABASE_HOST")
+    db_user = os.getenv("DATABASE_USERNAME")
+    db_password = os.getenv("DATABASE_PASSWORD")
+    db_name = os.getenv("DATABASE")
+
+    # Vérifier si toutes les variables d'environnement sont présentes
+    if not all([db_host, db_user, db_password, db_name]):
+        print("Les informations de connexion à la base de données sont incomplètes.")
+        return
+
+    connection = None
+    try:
+        # Connexion à la base de données avec MySQLdb
+        connection = MySQLdb.connect(
+            host=db_host,
+            user=db_user,
+            passwd=db_password,
+            db=db_name,
+            autocommit=True,
+            ssl_mode="VERIFY_IDENTITY",
+            ssl={"ca": "/etc/ssl/cert.pem"}
+        )
+        cursor = connection.cursor()
+
+        # Préparation et exécution de la requête SQL
+        insert_query = """
+            INSERT INTO raw_response (
+                id, choices, created, model, object, system_fingerprint, usage, cost
+            ) VALUES (
+                %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s
+            )
+            """
+        cursor.execute(insert_query, (
+            raw_response["id"], 
+            json.dumps(raw_response["choices"]), 
+            raw_response["created"], 
+            raw_response["model"], 
+            raw_response["object"], 
+            raw_response["system_fingerprint"], 
+            json.dumps(raw_response["usage"],
+            json.dumps(raw_response["cost"])
+        )))
+
     except MySQLdb.Error as err:
         raise err
 
