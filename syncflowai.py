@@ -186,9 +186,9 @@ def store_raw_response(raw_response):
             raw_response["model"], 
             raw_response["object"], 
             raw_response["system_fingerprint"], 
-            json.dumps(raw_response["usage"],
+            json.dumps(raw_response["usage"]),
             json.dumps(raw_response["cost"])
-        )))
+        ))
 
     except MySQLdb.Error as err:
         raise err
