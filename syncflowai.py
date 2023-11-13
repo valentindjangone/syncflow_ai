@@ -116,44 +116,44 @@ def extract_mission_details(mission):
 
     return mission_dict, raw_response
 
-def store_processed_mission(mission_dict):
-    # Récupération des variables d'environnement
+def get_db_connection():
     db_host = os.getenv("DATABASE_HOST")
     db_user = os.getenv("DATABASE_USERNAME")
     db_password = os.getenv("DATABASE_PASSWORD")
     db_name = os.getenv("DATABASE")
 
-    # Vérifier si toutes les variables d'environnement sont présentes
     if not all([db_host, db_user, db_password, db_name]):
-        print("Les informations de connexion à la base de données sont incomplètes.")
-        return
+        raise Exception("Les informations de connexion à la base de données sont incomplètes.")
 
-    connection = None
+    connection = MySQLdb.connect(
+        host=db_host,
+        user=db_user,
+        passwd=db_password,
+        db=db_name,
+        autocommit=True,
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={"ca": "/etc/ssl/cert.pem"}
+    )
+    return connection
+def store_processed_mission(mission_dict):
+    connection = get_db_connection()
     try:
-        # Connexion à la base de données avec MySQLdb
-        connection = MySQLdb.connect(
-            host=db_host,
-            user=db_user,
-            passwd=db_password,
-            db=db_name,
-            autocommit=True,
-            ssl_mode="VERIFY_IDENTITY",
-            ssl={"ca": "/etc/ssl/cert.pem"}
-        )
         cursor = connection.cursor()
-
-        # Préparation et exécution de la requête SQL
         insert_query = """
             INSERT INTO processed_mission (id, mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
+        budget = mission_dict.get("budget")
+        if budget is not None:
+            budget = json.dumps(budget)
+
         cursor.execute(insert_query, (
             mission_dict["id"],
             mission_dict["name"],
             mission_dict["abstract"],
             mission_dict["detail"],
-            json.dumps(mission_dict["roles"]), 
-            json.dumps(mission_dict["budget"]),
+            json.dumps(mission_dict.get("roles", [])),  # Utilise une liste vide si "roles" n'est pas présent
+            budget,  # Utilise None si "budget" n'est pas présent
             mission_dict["metadata_id"]
         ))
 
@@ -161,35 +161,15 @@ def store_processed_mission(mission_dict):
         raise err
 
     finally:
-        # Fermeture de la connexion à la base de données
         if connection and connection.open:
             cursor.close()
             connection.close()
 
 def store_raw_response(raw_response):
-    # Récupération des variables d'environnement
-    db_host = os.getenv("DATABASE_HOST")
-    db_user = os.getenv("DATABASE_USERNAME")
-    db_password = os.getenv("DATABASE_PASSWORD")
-    db_name = os.getenv("DATABASE")
-
-    # Vérifier si toutes les variables d'environnement sont présentes
-    if not all([db_host, db_user, db_password, db_name]):
-        print("Les informations de connexion à la base de données sont incomplètes.")
-        return
-
+    connection = get_db_connection()
     connection = None
+
     try:
-        # Connexion à la base de données avec MySQLdb
-        connection = MySQLdb.connect(
-            host=db_host,
-            user=db_user,
-            passwd=db_password,
-            db=db_name,
-            autocommit=True,
-            ssl_mode="VERIFY_IDENTITY",
-            ssl={"ca": "/etc/ssl/cert.pem"}
-        )
         cursor = connection.cursor()
 
         # Préparation et exécution de la requête SQL
