@@ -202,7 +202,7 @@ def store_raw_response(raw_response):
             """
         cursor.execute(insert_query, (
             raw_response["id"], 
-            json.dumps(raw_response["choices"]), 
+            json.dumps(raw_response["choices"][0]), 
             raw_response["created"], 
             raw_response["model"], 
             raw_response["object"], 
