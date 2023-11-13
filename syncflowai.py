@@ -135,6 +135,7 @@ def get_db_connection():
         ssl={"ca": "/etc/ssl/cert.pem"}
     )
     return connection
+
 def store_processed_mission(mission_dict):
     connection = get_db_connection()
     try:
@@ -143,22 +144,36 @@ def store_processed_mission(mission_dict):
             INSERT INTO processed_mission (id, mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
             VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
+
         budget = mission_dict.get("budget")
         if budget is not None:
             budget = json.dumps(budget)
+        name = mission_dict.get("name")
+        if name is not None:
+            name = json.dumps(name)
+        abstract = mission_dict.get("abstract")
+        if abstract is not None:
+            abstract = json.dumps(abstract)
+        detail = mission_dict.get("detail")
+        if detail is not None:
+            detail = json.dumps(detail)
+        roles = mission_dict.get("roles")
+        if roles is not None:
+            roles = json.dumps(roles)
 
         cursor.execute(insert_query, (
             mission_dict["id"],
-            mission_dict["name"],
-            mission_dict["abstract"],
-            mission_dict["detail"],
-            json.dumps(mission_dict["roles"]),  # Utilise une liste vide si "roles" n'est pas présent
+            name,
+            abstract,
+            detail,
+            roles,  # Utilise une liste vide si "roles" n'est pas présent
             budget,  # Utilise None si "budget" n'est pas présent
             mission_dict["metadata_id"]
         ))
 
-    except MySQLdb.Error as err:
-        raise err
+    except Exception as e:
+            # Cela capturera toutes les exceptions, y compris KeyError, MySQLdb.Error, etc.
+            raise HTTPException(status_code=500, detail=f"Erreur rencontrée : {str(e)}")
 
     finally:
         if connection and connection.open:

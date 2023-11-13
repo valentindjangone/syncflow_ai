@@ -38,13 +38,10 @@ async def extract_mission_details(mission: Mission, include_raw: bool = False):
         else:
             return processed_mission
         
-    except MySQLdb.Error as err:
-        raise HTTPException(status_code=503, detail=f"Erreur lors de l'insertion dans la base de données: {err}")
-
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    
+            # Cela capturera toutes les exceptions, y compris KeyError, MySQLdb.Error, etc.
+            raise HTTPException(status_code=500, detail=f"Erreur rencontrée : {str(e)}")
+        
 # Exécuter l'application si ce fichier est le point d'entrée principal
 if __name__ == "__main__":
     uvicorn.run(api, host="0.0.0.0", port=8000)
