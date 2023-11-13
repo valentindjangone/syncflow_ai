@@ -1,4 +1,5 @@
 import json
+from fastapi import FastAPI, HTTPException
 import openai
 from dotenv import load_dotenv
 import os
@@ -112,6 +113,7 @@ def extract_mission_details(mission):
 
     mission_dict = json.loads(response.model_dump()['choices'][0]['message']['function_call']['arguments'])
     mission_dict['id'] = uuid.uuid1()
+    mission_dict['created'] = raw_response['created']
     mission_dict['metadata_id'] = raw_response['id']
 
     return mission_dict, raw_response
@@ -144,7 +146,7 @@ def store_processed_mission(mission_dict):
             INSERT INTO processed_mission (id, created, mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
             VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s)
         """
-
+        created = mission_dict["created"]
         budget = mission_dict.get("budget")
         if budget is not None:
             budget = json.dumps(budget)
@@ -163,7 +165,7 @@ def store_processed_mission(mission_dict):
 
         cursor.execute(insert_query, (
             mission_dict["id"],
-            raw_response["created"],
+            created,
             name,
             abstract,
             detail,
