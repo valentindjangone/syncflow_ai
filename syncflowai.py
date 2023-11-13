@@ -1,5 +1,5 @@
 import json
-from fastapi import FastAPI, HTTPException
+from fastapi import HTTPException
 import openai
 from dotenv import load_dotenv
 import os
