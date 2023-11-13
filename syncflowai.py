@@ -141,8 +141,8 @@ def store_processed_mission(mission_dict):
     try:
         cursor = connection.cursor()
         insert_query = """
-            INSERT INTO processed_mission (id, mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO processed_mission (id, created, mission_name, mission_abstract, mission_detail, roles, budget, metadata_id) 
+            VALUES (%s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s)
         """
 
         budget = mission_dict.get("budget")
@@ -163,6 +163,7 @@ def store_processed_mission(mission_dict):
 
         cursor.execute(insert_query, (
             mission_dict["id"],
+            raw_response["created"],
             name,
             abstract,
             detail,
@@ -189,15 +190,15 @@ def store_raw_response(raw_response):
         # Préparation et exécution de la requête SQL
         insert_query = """
             INSERT INTO raw_response (
-                id, choices, created, model, object, system_fingerprint, usage, cost
+                id, created, choices, model, object, system_fingerprint, usage, cost
             ) VALUES (
-                %s, %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s
+                %s, FROM_UNIXTIME(%s), %s, %s, %s, %s, %s, %s
             )
             """
         cursor.execute(insert_query, (
             raw_response["id"], 
-            json.dumps(raw_response["choices"][0]), 
             raw_response["created"], 
+            json.dumps(raw_response["choices"][0]), 
             raw_response["model"], 
             raw_response["object"], 
             raw_response["system_fingerprint"], 
