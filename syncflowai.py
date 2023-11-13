@@ -152,7 +152,7 @@ def store_processed_mission(mission_dict):
             mission_dict["name"],
             mission_dict["abstract"],
             mission_dict["detail"],
-            json.dumps(mission_dict.get("roles", [])),  # Utilise une liste vide si "roles" n'est pas présent
+            json.dumps(mission_dict["roles"]),  # Utilise une liste vide si "roles" n'est pas présent
             budget,  # Utilise None si "budget" n'est pas présent
             mission_dict["metadata_id"]
         ))
@@ -167,7 +167,6 @@ def store_processed_mission(mission_dict):
 
 def store_raw_response(raw_response):
     connection = get_db_connection()
-    connection = None
 
     try:
         cursor = connection.cursor()
