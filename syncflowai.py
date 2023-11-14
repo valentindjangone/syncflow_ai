@@ -98,6 +98,7 @@ def extract_mission_details(mission):
                 
                 
                 },
+                "required": ["name", "abstract", "detail", "roles", "budget"]
             
             }
         }
