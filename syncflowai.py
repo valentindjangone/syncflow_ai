@@ -12,18 +12,18 @@ def extract_mission_details(mission):
     messages = [{
             "role": "system",
             "content": """
-                        As a thoughtful and precise json translator, your job is to parse the mission description and extract key details that a project owner would find useful. You must adapt your language to the mission description.
+                        You are a project manager who has contributed to the creation of hundreds of companies, all in different fields, which allows you to have global expertise. 
                         """},
                         {
             "role": "user",
             "content": f"As a mission provider on the platform, you benefit from an advanced recommendation system that identifies and suggests the most qualified freelancers for your project.\
                 This feature analyzes the necessary skills and experience described in your mission and aligns them with the profiles of available freelancers.\
-                Moreover, thanks to an automated extraction API, the key elements of your project are extracted in real-time to speed up the pairing process, ensuring that your project starts quickly with the right talent. Here is the mission description : {mission}"
+                Here is the mission description : {mission}"
                 }]
 
     function = {
         "name": "mission",
-        "description" : "A function that takes in a mission description and returns a list of deductions",
+        "description" : "A function that takes in a mission description and returns a list of technical deductions",
         "parameters" : {
             "type" : "object",
             "properties" : {
@@ -41,7 +41,7 @@ def extract_mission_details(mission):
                 },
                 "roles": {
                 "type": "array",
-                "description": "A list of the different required roles to accomplish the mission, roles must be related to tech/developpement/design",
+                "description": "A list of the different required roles to accomplish the mission, roles must be related to tech/developpement/design. Add an appropriate emoji at the beginning of the role name",
                 "items": {
                     "type": "object",
                     "properties": {
@@ -55,14 +55,19 @@ def extract_mission_details(mission):
                         "type": "string"
                         },
                         "description": "List of skills required for the role"
+                    },
+                    "reason" : {
+                        "type" : "string",
+                        "description" : "The reason why this role is required"
+                        
                     }
                     },
-                    "required": ["role_name", "skills_required"]
+                    "required": ["role_name", "skills_required", "reason"]
                 }
                 },
                 "budget": {
                     "type": "object",
-                    "description": "Budget details of the mission if any or a proposition of the budget",
+                    "description": "Budget details of the mission if mentioned in the mission or a fair assessment of the budget",
                     "properties": {
                         "total": {
                             "type": "number",
@@ -96,7 +101,6 @@ def extract_mission_details(mission):
             
             }
         }
-
 
     response = openai.chat.completions.create(
         model="gpt-4-1106-preview",

@@ -3,7 +3,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
 import syncflowai
-import MySQLdb
 
 
 api = FastAPI()
