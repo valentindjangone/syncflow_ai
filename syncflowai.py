@@ -41,7 +41,7 @@ def extract_mission_details(mission):
                 },
                 "roles": {
                 "type": "array",
-                "description": "A list of the different required roles to accomplish the mission, roles must be related to tech/developpement/design. Add an appropriate emoji at the beginning of the role name",
+                "description": "A list of the different required roles to accomplish the mission, roles must be related to tech/developpement/design and an appropriate emoji should be systematically added at the beginning of the role name",
                 "items": {
                     "type": "object",
                     "properties": {
