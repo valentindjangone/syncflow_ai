@@ -47,7 +47,7 @@ def extract_mission_details(mission):
                     "properties": {
                     "role_name": {
                         "type": "string",
-                        "description": "The name of the role which must invariably be precedded by an adequate emoji"
+                        "description": "emoji related to the role + name of the role"
                     },
                     "skills_required": {
                         "type": "array",
