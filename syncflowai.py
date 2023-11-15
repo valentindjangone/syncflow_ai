@@ -41,13 +41,13 @@ def extract_mission_details(mission):
                 },
                 "roles": {
                 "type": "array",
-                "description": "A list of the different required roles to accomplish the mission, roles must be related to tech/developpement/design and an appropriate emoji should be systematically added at the beginning of the role name",
+                "description": "A list of the different required roles to accomplish the mission, roles must be related to tech/developpement/design.",
                 "items": {
                     "type": "object",
                     "properties": {
                     "role_name": {
                         "type": "string",
-                        "description": "The name of the role precedded by an emoji"
+                        "description": "The name of the role which must invariably be precedded by an adequate emoji"
                     },
                     "skills_required": {
                         "type": "array",
