@@ -16,7 +16,7 @@ def extract_mission_details(mission):
                         """},
                         {
             "role": "user",
-            "content": f"As a mission provider on the platform, you benefit from an AI assistant that helps you to extract technical details from a mission so you can frame your needs rapidly and accurately.
+            "content": f"As a mission provider on the platform, you benefit from an AI assistant that helps you to extract technical details from a mission so you can frame your needs rapidly and accurately.\
                 Here is the mission description : {mission}"
                 }]
 
