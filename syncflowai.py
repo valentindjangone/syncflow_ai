@@ -16,8 +16,7 @@ def extract_mission_details(mission):
                         """},
                         {
             "role": "user",
-            "content": f"As a mission provider on the platform, you benefit from an advanced recommendation system that identifies and suggests the most qualified freelancers for your project.\
-                This feature analyzes the necessary skills and experience described in your mission and aligns them with the profiles of available freelancers.\
+            "content": f"As a mission provider on the platform, you benefit from an AI assistant that helps you to extract technical details from a mission so you can frame your needs rapidly and accurately.
                 Here is the mission description : {mission}"
                 }]
 
