@@ -38,7 +38,7 @@ def extract_mission_details(mission):
                 },
                 "detail" : {
                 "type" : "string",
-                "description" : "An advanced technical reformulation of the mission"
+                "description" : "An advanced technical reformulation of the mission, highlight impoortant details with a <b> </b> tag" 
                 },
                 "roles": {
                 "type": "array",
