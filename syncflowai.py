@@ -302,9 +302,12 @@ def give_feedback(mission, processed_mission, model="gpt-4-1106-preview"):
             },
             "prompt_version" : {
                 "type" : "string",
-        }
+                "description" : "The version of the prompt used, randomly v1 or v2",
+        },
 
-        }
+        },
+        "required" : ["user_rating", "user_comments", "modification_details", "prompt_version"]
+
     }}
     response = openai.chat.completions.create(
         model = model,
