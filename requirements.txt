@@ -3,3 +3,4 @@ fastapi==0.100.1
 uvicorn
 python-dotenv
 mysqlclient
+numpy
