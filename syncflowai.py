@@ -213,7 +213,7 @@ def get_feedback(mission, processed_mission, model="gpt-4-1106-preview"):
     response = openai.chat.completions.create(
         model = model,
         messages = messages,
-        temperature = 0.75
+        temperature = 0.75,
         functions = [function],
         function_call = {"name" : "feedback"}
     )
