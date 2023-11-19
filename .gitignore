@@ -1,4 +1,4 @@
 .env
 __pycache__/syncflowai.cpython-311.pyc
-test.ipynb
+*.ipynb
 
