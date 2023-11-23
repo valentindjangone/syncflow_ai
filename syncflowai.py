@@ -6,6 +6,10 @@ import MySQLdb
 import uuid
 import random
 import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+import datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,7 +38,7 @@ def extract_mission_details(mission):
                 },
                 "abstract" : {
                     "type" : "string",
-                    "description" : "A synthetic description of the mission"
+                    "description" : "A reformulated, synthetic description of the mission"
                 },
                 "detail" : {
                 "type" : "string",
@@ -165,13 +169,14 @@ def generate_mission(n=10, model="gpt-4-1106-preview", temperature=0.85):
 
     return text_response
 
-def get_feedback(mission, processed_mission, model="gpt-4-1106-preview"):
+def generate_feedback(mission, processed_mission, feedback_date, model="gpt-4-1106-preview", temperature=1.2):
+    rating = np.random.randint(4, 6)
     messages = [
         {
         "role" : "system",
         "content" : f"You simulate a project owner that just submitted a mission on the platform,\
         you benefit from an ai assistant that helps you to extract technical details from that mission so you can frame your needs rapidly and accurately.\
-        This time, the AI was not performant enough and you decide to fill a survey to give a feedback. Here is your original posted mission : {mission} "
+        This time, the AI was not performant enough. You give it a rating of {rating} stars out of 5 and you decide to fill a survey to give a feedback. Here is your original posted mission : {mission} "
         },
 
         {
@@ -188,8 +193,7 @@ def get_feedback(mission, processed_mission, model="gpt-4-1106-preview"):
             "user_rating" : {
                 "type" : "integer",
                 "description" : "The rating given by the user",
-                "minimum" : 1,
-                "maximum" : 5
+
             },
             "user_comments" : {
                 "type" : "string",
@@ -199,12 +203,9 @@ def get_feedback(mission, processed_mission, model="gpt-4-1106-preview"):
             },
             "modification_details" : {
                 "type" : "string",
-                "description" : "The mission details given by AI modified/rectified by user, can be fully modified or partially",
+                "description" : "The mission details given by the AI modified or rectified by the user it can be fully modified, partially or not at all if the user was satisfied",
             },
-            "prompt_version" : {
-                "type" : "string",
-                "description" : "The version of the prompt used, randomly v1 or v2",
-        },
+
 
         },
         "required" : ["user_rating", "user_comments", "modification_details", "prompt_version"]
@@ -213,19 +214,20 @@ def get_feedback(mission, processed_mission, model="gpt-4-1106-preview"):
     response = openai.chat.completions.create(
         model = model,
         messages = messages,
-        temperature = 0.75,
+        temperature = temperature,
         functions = [function],
         function_call = {"name" : "feedback"}
     )
 
     feedback_dict = json.loads(response.model_dump()['choices'][0]['message']['function_call']['arguments'])
     feedback_dict['id'] = uuid.uuid1()
+    feedback_dict['created'] = feedback_date
     feedback_dict['prompt_version'] = np.random.choice(['v1', 'v2'])
     feedback_dict['mission_id'] = processed_mission['id']
     
     return feedback_dict
 
-def get_db_connection():
+def connect_to_db():
     db_host = os.getenv("DATABASE_HOST")
     db_user = os.getenv("DATABASE_USERNAME")
     db_password = os.getenv("DATABASE_PASSWORD")
@@ -245,8 +247,27 @@ def get_db_connection():
     )
     return connection
 
+def fetch_data(query):
+    with connect_to_db() as db:
+        cur = db.cursor()
+        cur.execute(query)
+        columns = [col[0] for col in cur.description]
+        data = pd.DataFrame(list(cur.fetchall()), columns=columns)
+        cur.close()
+    return data
+
+def plot_and_save(data, plot_type, title, filename):
+    plt.figure(figsize=(10, 6))
+    if plot_type == 'count':
+        sns.countplot(x='user_rating', data=data)
+    elif plot_type == 'bar':
+        sns.barplot(x=['v1', 'v2'], y=data)
+    plt.title(title)
+    plt.savefig(f'./artifacts/{filename}.png')  # Suppression des arguments non supportés
+    plt.close()
+
 def store_processed_mission(mission_dict):
-    connection = get_db_connection()
+    connection = connect_to_db()
     try:
         cursor = connection.cursor()
         insert_query = """
@@ -291,7 +312,7 @@ def store_processed_mission(mission_dict):
             connection.close()
 
 def store_raw_response(raw_response):
-    connection = get_db_connection()
+    connection = connect_to_db()
 
     try:
         cursor = connection.cursor()
@@ -325,7 +346,7 @@ def store_raw_response(raw_response):
             connection.close()
 
 def store_feedback(feedback):
-    connection = get_db_connection()
+    connection = connect_to_db()
 
     try:
         cursor = connection.cursor()
@@ -333,9 +354,9 @@ def store_feedback(feedback):
         # Préparation et exécution de la requête SQL
         insert_query = """
             INSERT INTO user_feedback (
-                id, user_rating, user_comments, prompt_version, mission_id
+                id, user_rating, user_comments, prompt_version, mission_id, created
             ) VALUES (
-                %s, %s, %s, %s, %s
+                %s, %s, %s, %s, %s, %s
             )
             """
         cursor.execute(insert_query, (
@@ -343,7 +364,8 @@ def store_feedback(feedback):
             feedback.get("user_rating"), 
             feedback.get("user_comments"),
             feedback.get("prompt_version"),
-            feedback.get('mission_id')
+            feedback.get('mission_id'),
+            feedback.get('created')
 
         ))
 
