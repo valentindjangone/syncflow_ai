@@ -9,10 +9,11 @@ import os
 os.chdir('./wordcloud/data/')
 
 # Paramètres de connexion à la base de données
-host = "aws.connect.psdb.cloud"
-user = "eej2rc29zgxmuoa3kn75"
-passwd = "pscale_pw_7CVHTVRV4PFXlXgIEwl37RHdr1ikZ0YDqAqODGud1n7"
-db = "syncflow"
+host = os.getenv('DATABASE_HOST')
+user = os.getenv('DATABASE_USERNAME')
+passwd = os.getenv('DATABASE_PASSWORD')
+db = os.getenv('DATABASE')
+
 
 # Connexion à la base de données
 conn = MySQLdb.connect(host=host, user=user, passwd=passwd, db=db)
