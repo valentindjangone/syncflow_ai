@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+#
 def extract_mission_details(mission):
     messages = [{
             "role": "system",
