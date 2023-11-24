@@ -23,3 +23,8 @@ jobs:
 
     - name: Run the script
       run: python prepro_wordcloud_user_comments.py
+      env:
+        DATABASE: ${{ secrets.DATABASE }}
+        DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+        DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+        DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
