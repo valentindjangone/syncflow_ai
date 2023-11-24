@@ -1,0 +1,25 @@
+name: Daily WordCloud Generation
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install MySQLdb
+        pip install nltk
+
+    - name: Run the script
+      run: python prepro_wordcloud_user_comments.py

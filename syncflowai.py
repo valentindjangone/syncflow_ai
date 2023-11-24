@@ -168,8 +168,9 @@ def generate_mission(n=10, model="gpt-4-1106-preview", temperature=0.85):
 
     return text_response
 
-def generate_feedback(mission, processed_mission, feedback_date, model="gpt-4-1106-preview", temperature=1.2):
-    rating = np.random.randint(4, 6)
+def generate_feedback(mission, raw_response, feedback_date, rating_limits, model="gpt-4-1106-preview", temperature=1.2):
+    
+    rating = np.random.randint(rating_limits[0], rating_limits[1]+1)
     messages = [
         {
         "role" : "system",
@@ -180,7 +181,7 @@ def generate_feedback(mission, processed_mission, feedback_date, model="gpt-4-11
 
         {
             "role" : "user",
-            "content" : processed_mission['detail']
+            "content" : json.loads(raw_response['choices'][0]['message']['function_call']['arguments'])['detail']
         }
         ]
 
@@ -222,7 +223,7 @@ def generate_feedback(mission, processed_mission, feedback_date, model="gpt-4-11
     feedback_dict['id'] = uuid.uuid1()
     feedback_dict['created'] = feedback_date
     feedback_dict['prompt_version'] = np.random.choice(['v1', 'v2'])
-    feedback_dict['mission_id'] = processed_mission['id']
+    feedback_dict['mission_id'] = raw_response['id']
     
     return feedback_dict
 
