@@ -5,6 +5,8 @@ import datetime
 import json
 from nltk.corpus import stopwords
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 os.chdir('./wordcloud/data/')
 
@@ -27,7 +29,7 @@ cursor.execute(sql)
 comments = [item[0] for item in cursor.fetchall()]
 
 # Liste des stop words
-stop_words = set(stopwords.words('english'))
+stop_words = set(stopwords.words('english') + ['ai'])
 
 # Nettoyage et comptage des mots
 words = []
@@ -42,7 +44,7 @@ timestamp = datetime.datetime.today().strftime("%Y-%m-%d")
 filename = f'wordcloud_data_{timestamp}.json'
 
 # Utilisation de most_common pour récupérer les 20 termes les plus fréquents
-top_words_freq = word_freq.most_common(30)
+top_words_freq = word_freq.most_common(40)
 
 # Conversion des données en format JSON
 wordcloud_data = [{'name': word, 'value': freq} for word, freq in top_words_freq]
