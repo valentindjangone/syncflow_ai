@@ -8,7 +8,7 @@ services:
     volumes:
       - .:/app
       - ./certs/cert.pem:/etc/ssl/cert.pem
-    command: /bin/bash -c "pip install --upgrade pip"
+    command: /bin/bash -c "pip install --upgrade pip && pip install -r requirements.txt"
     ports:
       - "8000:8000"
     environment:
