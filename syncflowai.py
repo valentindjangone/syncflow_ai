@@ -241,7 +241,6 @@ def connect_to_db():
         passwd=db_password,
         db=db_name,
         autocommit=True,
-        ssl_mode="VERIFY_IDENTITY",
         ssl={"ca": "/etc/ssl/cert.pem"}
     )
     return connection
