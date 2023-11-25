@@ -1,0 +1,26 @@
+
+version: '3.8'
+
+services:
+  mon_app:
+    image: python:3.9
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./certs/cert.pem:/etc/ssl/cert.pem
+    command: uvicorn main:api --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    depends_on:
+      - datadog
+
+  datadog:
+    image: datadog/agent:latest
+    environment:
+      DD_SITE: "datadoghq.com"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /proc/:/host/proc/:ro
+      - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
