@@ -7,7 +7,6 @@ import uuid
 import random
 import numpy as np
 import pandas as pd
-import seaborn as sns
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 
@@ -257,15 +256,6 @@ def fetch_data(query):
         cur.close()
     return data
 
-def plot_and_save(data, plot_type, title, filename):
-    plt.figure(figsize=(10, 6))
-    if plot_type == 'count':
-        sns.countplot(x='user_rating', data=data)
-    elif plot_type == 'bar':
-        sns.barplot(x=['v1', 'v2'], y=data)
-    plt.title(title)
-    plt.savefig(f'./artifacts/{filename}.png')  # Suppression des arguments non supportés
-    plt.close()
 
 def store_processed_mission(mission_dict):
     connection = connect_to_db()
