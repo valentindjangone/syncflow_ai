@@ -41,8 +41,12 @@ word_freq = Counter(words)
 timestamp = datetime.datetime.today().strftime("%Y-%m-%d")
 filename = f'wordcloud_data_{timestamp}.json'
 
+# Utilisation de most_common pour récupérer les 20 termes les plus fréquents
+top_words_freq = word_freq.most_common(30)
+
 # Conversion des données en format JSON
-wordcloud_data = [{'word': word, 'frequency': freq} for word, freq in word_freq.items()]
+wordcloud_data = [{'name': word, 'value': freq} for word, freq in top_words_freq]
+
 
 # Enregistrement des données dans un fichier JSON
 with open(filename, 'w', encoding='utf-8') as jsonfile:
