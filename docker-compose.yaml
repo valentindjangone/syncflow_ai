@@ -1,4 +1,3 @@
-
 version: '3.8'
 
 services:
@@ -8,10 +7,7 @@ services:
     volumes:
       - .:/app
       - ./certs/cert.pem:/app/cert.pem
-    command: >
-      /bin/bash -c "
-      uvicorn main:api --host 0.0.0.0 --port 8000
-      "
+    command: /bin/bash -c "uvicorn main:api --host 0.0.0.0 --port 8000"
     ports:
       - "8000:8000"
     environment:
@@ -20,10 +16,18 @@ services:
       - datadog
 
   datadog:
-    image: datadog/agent:latest
+    image: gcr.io/datadoghq/agent:7
+    container_name: dd-agent
     environment:
-      DD_SITE: "datadoghq.com"
+      DD_API_KEY: 1d5b750dd76d1c8536bea688e402a808
+      DD_SITE: "datadoghq.eu"
+      DD_APM_ENABLED: "true"
+      DD_APM_NON_LOCAL_TRAFFIC: "true"
+      DD_APM_RECEIVER_SOCKET: "/opt/datadog/apm/inject/run/apm.socket"
+      DD_DOGSTATSD_SOCKET: "/opt/datadog/apm/inject/run/dsd.socket"
     volumes:
+      - /opt/datadog/apm:/opt/datadog/apm
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /proc/:/host/proc/:ro
       - /sys/fs/cgroup/:/host/sys/fs/cgroup:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
