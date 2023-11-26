@@ -10,7 +10,6 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
-
 load_dotenv()
 
 #
@@ -127,6 +126,45 @@ def extract_mission_details(mission):
     mission_dict['metadata_id'] = raw_response['id']
 
     return mission_dict, raw_response
+
+def update_mission_details(mission_id, mission_update):
+    # Connexion à la base de données MySQL en utilisant la fonction existante
+    conn = connect_to_db()
+    cursor = conn.cursor()
+
+    try:
+        # Construction de la requête SQL pour mettre à jour la mission
+        update_query = "UPDATE processed_mission SET "
+        update_parts = []
+        params = []
+
+        if mission_update.abstract is not None:
+            update_parts.append("mission_abstract = %s")
+            params.append(mission_update.abstract)
+
+        if mission_update.detail is not None:
+            update_parts.append("mission_detail = %s")
+            params.append(mission_update.detail)
+
+        # Ajoutez d'autres champs ici si nécessaire
+
+        update_query += ", ".join(update_parts)
+        update_query += " WHERE id = %s"
+        params.append(str(mission_id))
+
+        # Exécution de la requête
+        cursor.execute(update_query, params)
+        conn.commit()
+
+    except MySQLdb.Error as e:
+        print(f"Error updating mission: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+    finally:
+        cursor.close()
+        conn.close()
+
+    return {"message": "Mission updated successfully"}
 
 def generate_mission(n=10, model="gpt-4-1106-preview", temperature=0.85):
 
