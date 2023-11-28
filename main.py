@@ -30,6 +30,12 @@ class MissionUpdate(BaseModel):
 class Mission(BaseModel):
     mission: str
 
+class FeedbackInput(BaseModel):
+    mission_id: UUID4
+    user_comment: str
+    rating: int
+    prompt_version: Optional[str] = None
+
 @api.post("/extract_all_details")
 async def extract_mission_details(mission: Mission, include_raw: bool = False):
     try:
@@ -41,7 +47,7 @@ async def extract_mission_details(mission: Mission, include_raw: bool = False):
             return {"processed_mission": processed_mission, "raw_response": raw_response}
         else:
             return processed_mission
-        
+
     except Exception as e:
             # Cela capturera toutes les exceptions, y compris KeyError, MySQLdb.Error, etc.
             raise HTTPException(status_code=500, detail=f"Erreur rencontrée : {str(e)}")
@@ -55,7 +61,20 @@ async def update_mission(mission_id: UUID4, mission_update: MissionUpdate):
     except HTTPException as e:
         # Gestion des erreurs, par exemple si la mission n'est pas trouvée ou en cas d'erreur serveur
         raise e
-
+    
+@api.post('/feedback')    
+async def submit_feedback(feedback_input: FeedbackInput):
+    try:
+        feedback_response = syncflowai.write_feedback(
+            feedback_input.mission_id,
+            feedback_input.user_comment,
+            feedback_input.rating,
+            feedback_input.prompt_version
+        )
+        return {"message": "Feedback submitted successfully", "feedback_id": feedback_response.get("id")}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
 # Exécuter l'application si ce fichier est le point d'entrée principal
 if __name__ == "__main__":
     uvicorn.run(api, host="0.0.0.0", port=8000)

@@ -7,8 +7,6 @@ import uuid
 import random
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -295,16 +293,6 @@ def fetch_data(query):
         cur.close()
     return data
 
-def plot_and_save(data, plot_type, title, filename):
-    plt.figure(figsize=(10, 6))
-    if plot_type == 'count':
-        sns.countplot(x='user_rating', data=data)
-    elif plot_type == 'bar':
-        sns.barplot(x=['v1', 'v2'], y=data)
-    plt.title(title)
-    plt.savefig(f'./artifacts/{filename}.png')  # Suppression des arguments non supportés
-    plt.close()
-
 def store_processed_mission(mission_dict):
     connection = connect_to_db()
     try:
@@ -406,6 +394,50 @@ def store_feedback(feedback):
             feedback.get('mission_id'),
             feedback.get('created')
 
+        ))
+
+    except MySQLdb.Error as err:
+        raise err
+
+    finally:
+        # Fermeture de la connexion à la base de données
+        if connection and connection.open:
+            cursor.close()
+            connection.close()
+
+
+def write_feedback(mission_id, user_comment, rating, prompt_version=None):
+
+    generated_id = {'id' : uuid.uuid1()}
+
+    feedback = dict(generated_id)
+    feedback['id'] = uuid.uuid1()
+    feedback['user_rating'] = int(rating)
+    feedback['user_comments'] = str(user_comment)
+    feedback['mission_id'] = mission_id
+    feedback['prompt_version'] = prompt_version
+    feedback['created'] = datetime.datetime.today()
+    connection = connect_to_db()
+
+    try:
+        cursor = connection.cursor()
+
+        # Préparation et exécution de la requête SQL
+        insert_query = """
+            INSERT INTO user_feedback (
+                id, user_rating, user_comments, mission_id, created, prompt_version
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s
+            )
+            """
+
+        cursor.execute(insert_query, (
+            feedback.get("id"),
+            feedback.get("user_rating"),
+            feedback.get("user_comments"),
+            feedback.get('mission_id'),
+            feedback.get('created'),
+            feedback.get('prompt_version')
         ))
 
     except MySQLdb.Error as err:
