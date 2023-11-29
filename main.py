@@ -1,10 +1,9 @@
 from fastapi import FastAPI, HTTPException, Path
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel, UUID1
 from typing import Optional
 import uvicorn
 import syncflowai
-
 api = FastAPI()
 
 
@@ -31,10 +30,10 @@ class Mission(BaseModel):
     mission: str
 
 class FeedbackInput(BaseModel):
-    mission_id: UUID4
+    mission_id: UUID1
     user_comment: str
     rating: int
-    prompt_version: Optional[str] = None
+    prompt_version: Optional[str] = 'unknown'
 
 @api.post("/extract_all_details")
 async def extract_mission_details(mission: Mission, include_raw: bool = False):
@@ -53,7 +52,7 @@ async def extract_mission_details(mission: Mission, include_raw: bool = False):
             raise HTTPException(status_code=500, detail=f"Erreur rencontrée : {str(e)}")
 
 @api.patch("/missions/{mission_id}")
-async def update_mission(mission_id: UUID4, mission_update: MissionUpdate):
+async def update_mission(mission_id: UUID1, mission_update: MissionUpdate):
     try:
         # Appel à la fonction pour mettre à jour la mission
         update_response = syncflowai.update_mission_details(mission_id, mission_update)
@@ -61,7 +60,7 @@ async def update_mission(mission_id: UUID4, mission_update: MissionUpdate):
     except HTTPException as e:
         # Gestion des erreurs, par exemple si la mission n'est pas trouvée ou en cas d'erreur serveur
         raise e
-    
+
 @api.post('/feedback')    
 async def submit_feedback(feedback_input: FeedbackInput):
     try:
@@ -71,10 +70,10 @@ async def submit_feedback(feedback_input: FeedbackInput):
             feedback_input.rating,
             feedback_input.prompt_version
         )
-        return {"message": "Feedback submitted successfully", "feedback_id": feedback_response.get("id")}
+        return {"message": "Feedback submitted successfully", "feedback_id": feedback_response["id"]}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
 # Exécuter l'application si ce fichier est le point d'entrée principal
 if __name__ == "__main__":
     uvicorn.run(api, host="0.0.0.0", port=8000)

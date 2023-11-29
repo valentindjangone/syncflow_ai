@@ -8,6 +8,7 @@ import random
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
+import datetime
 load_dotenv()
 
 #
@@ -406,7 +407,7 @@ def store_feedback(feedback):
             connection.close()
 
 
-def write_feedback(mission_id, user_comment, rating, prompt_version=None):
+def write_feedback(mission_id, user_comment, rating, prompt_version='unknown'):
 
     generated_id = {'id' : uuid.uuid1()}
 
@@ -448,3 +449,9 @@ def write_feedback(mission_id, user_comment, rating, prompt_version=None):
         if connection and connection.open:
             cursor.close()
             connection.close()
+            
+    # Après insertion dans la base de données
+    feedback_id = feedback.get("id")
+    
+    # Retourner l'ID de feedback ou l'objet de feedback
+    return {'id': feedback_id}
