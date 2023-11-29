@@ -7,8 +7,6 @@ import uuid
 import random
 import numpy as np
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -267,9 +265,9 @@ def generate_feedback(mission, raw_response, feedback_date, rating_limits, model
     return feedback_dict
 
 def connect_to_db():
-    db_host = os.getenv("DATABASE_HOST")
-    db_user = os.getenv("DATABASE_USERNAME")
-    db_password = os.getenv("DATABASE_PASSWORD")
+    db_host = os.getenv("DATABASE_HOST_B")
+    db_user = os.getenv("DATABASE_USERNAME_B")
+    db_password = os.getenv("DATABASE_PASSWORD_B")
     db_name = os.getenv("DATABASE")
 
     if not all([db_host, db_user, db_password, db_name]):
@@ -294,16 +292,6 @@ def fetch_data(query):
         data = pd.DataFrame(list(cur.fetchall()), columns=columns)
         cur.close()
     return data
-
-def plot_and_save(data, plot_type, title, filename):
-    plt.figure(figsize=(10, 6))
-    if plot_type == 'count':
-        sns.countplot(x='user_rating', data=data)
-    elif plot_type == 'bar':
-        sns.barplot(x=['v1', 'v2'], y=data)
-    plt.title(title)
-    plt.savefig(f'./artifacts/{filename}.png')  # Suppression des arguments non supportés
-    plt.close()
 
 def store_processed_mission(mission_dict):
     connection = connect_to_db()
