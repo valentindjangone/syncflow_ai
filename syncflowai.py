@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 from nltk.corpus import stopwords
 from collections import Counter
 import re
+import nltk
 
 
 load_dotenv()
@@ -487,6 +488,7 @@ def get_wordcount(which_db):
 
     # Récupération des données
     comments = [item[0] for item in cursor.fetchall()]
+    nltk.download('stopwords')
 
     # Liste des stop words
     stop_words = set(stopwords.words('english') + ['ai'])
