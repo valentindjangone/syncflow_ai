@@ -6,3 +6,6 @@ mysqlclient
 numpy
 pandas
 seaborn
+nltk
+scipy
+collections
