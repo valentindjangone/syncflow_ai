@@ -292,7 +292,7 @@ def connect_to_db():
         db=db_name,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/certs/cert.pem"}
+        ssl={"ca": "/etc/sslcert.pem"}
     )
     return connection
 
@@ -306,7 +306,7 @@ def fetch_data(query):
     return data
 
 
-def fetch_feedback(which_db,days): # DAG
+def fetch_feedback(days, which_db): # DAG
 
     host = os.getenv('DATABASE_HOST_' + str(which_db))
     user = os.getenv('DATABASE_USERNAME_' + str(which_db))
@@ -322,7 +322,7 @@ def fetch_feedback(which_db,days): # DAG
         db=db,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/certs/cert.pem"}
+        ssl={"ca": "/etc/ssl/cert.pem"}
     )    
     cursor = connection.cursor()
 
@@ -461,11 +461,11 @@ def store_feedback(feedback):
             cursor.close()
             connection.close()
 
-def get_wordcount(which="A"):
+def get_wordcount(which_db):
     # Paramètres de connexion à la base de données
-    host = os.getenv('DATABASE_HOST_' + str(which))
-    user = os.getenv('DATABASE_USERNAME_' + str(which))
-    passwd = os.getenv('DATABASE_PASSWORD_' + str(which))
+    host = os.getenv('DATABASE_HOST_' + str(which_db))
+    user = os.getenv('DATABASE_USERNAME_' + str(which_db))
+    passwd = os.getenv('DATABASE_PASSWORD_' + str(which_db))
     db = os.getenv('DATABASE')
 
 
@@ -477,8 +477,8 @@ def get_wordcount(which="A"):
         db=db,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/certs/cert.pem"}
-    )    
+        ssl={"ca": "/etc/ssl/cert.pem"}
+    )
     cursor = connection.cursor()
 
     # Requête SQL pour récupérer les 50 derniers commentaires
@@ -510,11 +510,11 @@ def get_wordcount(which="A"):
 
     return wordcloud_data
 
-def get_stats():
+def get_stats(days=15):
 
     # Utilisation de la fonction pour récupérer les notes des deux bases de données
-    feedback_a = fetch_feedback(15)
-    feedback_b = fetch_feedback(15)
+    feedback_a = fetch_feedback(days, which_db="A")
+    feedback_b = fetch_feedback(days, which_db="B")
 
     ratings_a = feedback_a['ratings']
     ratings_b = feedback_b['ratings']
