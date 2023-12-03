@@ -348,7 +348,7 @@ def fetch_feedback(days, which_db): # DAG
     cursor.close()
     connection.close()
 
-    return {'ratings': ratings, 'comments': comments}
+    return {'ratings': ratings, 'comments': comments}, {"start_date": start_date, "most_recent_date": most_recent_date}
 
 def store_processed_mission(mission_dict):
     connection = connect_to_db()
@@ -515,17 +515,23 @@ def get_wordcount(which_db):
 def get_stats(days=15):
 
     # Utilisation de la fonction pour récupérer les notes des deux bases de données
-    feedback_a = fetch_feedback(days, which_db="A")
+    feedback_a, date_info = fetch_feedback(days, which_db="A")
     feedback_b = fetch_feedback(days, which_db="B")
 
     ratings_a = feedback_a['ratings']
     ratings_b = feedback_b['ratings']
 
+    start_date = date_info['start_date']
+    end_date = date_info['end_date']
     # Effectuer le test de Mann-Whitney U
     u_stat, p_value = mannwhitneyu(ratings_a, ratings_b)
     alpha = 0.05
 
     dico = {#"wordcount": wordcount,
+            'start_date': start_date,
+            'end_date': end_date,
+            'n_values_a': len(ratings_a),
+            'n_values_b': len(ratings_b),
             'u_stat': u_stat,
             'p_value': p_value,
             "mean_A": np.mean(ratings_a), 
