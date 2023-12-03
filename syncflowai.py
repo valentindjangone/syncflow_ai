@@ -348,7 +348,7 @@ def fetch_feedback(days, which_db): # DAG
     cursor.close()
     connection.close()
 
-    return {'ratings': ratings, 'comments': comments, "start_date": start_date, "most_recent_date": most_recent_date}
+    return {'ratings': ratings, 'comments': comments, "start_date": start_date, "end_date": most_recent_date}
 
 def store_processed_mission(mission_dict):
     connection = connect_to_db()
