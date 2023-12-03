@@ -292,7 +292,7 @@ def connect_to_db():
         db=db_name,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/ssl/cert.pem"}
+        ssl={"ca": "/certs/cert.pem"}
     )
     return connection
 
@@ -322,7 +322,7 @@ def fetch_feedback(which_db,days): # DAG
         db=db,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/ssl/cert.pem"}
+        ssl={"ca": "/certs/cert.pem"}
     )    
     cursor = connection.cursor()
 
@@ -477,7 +477,7 @@ def get_wordcount(which="A"):
         db=db,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/ssl/cert.pem"}
+        ssl={"ca": "/certs/cert.pem"}
     )    
     cursor = connection.cursor()
 
@@ -511,18 +511,10 @@ def get_wordcount(which="A"):
     return wordcloud_data
 
 def get_stats():
-    DATABASE = os.getenv('DATABASE')
-    DATABASE_HOST_A = os.getenv("DATABASE_HOST_A")
-    DATABASE_PASSWORD_A = os.getenv("DATABASE_PASSWORD_A")
-    DATABASE_USERNAME_A = os.getenv("DATABASE_USERNAME_A")
-
-    DATABASE_HOST_B = os.getenv("DATABASE_HOST_B")
-    DATABASE_PASSWORD_B = os.getenv("DATABASE_PASSWORD_B")
-    DATABASE_USERNAME_B = os.getenv("DATABASE_USERNAME_B")
 
     # Utilisation de la fonction pour récupérer les notes des deux bases de données
-    feedback_a = fetch_feedback(DATABASE_HOST_A, DATABASE_USERNAME_A, DATABASE_PASSWORD_A, DATABASE, 15)
-    feedback_b = fetch_feedback(DATABASE_HOST_B, DATABASE_USERNAME_B, DATABASE_PASSWORD_B, DATABASE, 15)
+    feedback_a = fetch_feedback(15)
+    feedback_b = fetch_feedback(15)
 
     ratings_a = feedback_a['ratings']
     ratings_b = feedback_b['ratings']
