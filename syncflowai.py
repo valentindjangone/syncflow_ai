@@ -292,7 +292,7 @@ def connect_to_db():
         db=db_name,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/sslcert.pem"}
+        ssl={"ca": "/etc/secrets/cert.pem"}
     )
     return connection
 
@@ -322,7 +322,7 @@ def fetch_feedback(days, which_db): # DAG
         db=db,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/ssl/cert.pem"}
+        ssl={"ca": "/etc/secrets/cert.pem"}
     )    
     cursor = connection.cursor()
 
@@ -477,7 +477,7 @@ def get_wordcount(which_db):
         db=db,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/ssl/cert.pem"}
+        ssl={"ca": "/etc/secrets/cert.pem"}
     )
     cursor = connection.cursor()
 
