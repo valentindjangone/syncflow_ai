@@ -306,10 +306,25 @@ def fetch_data(query):
     return data
 
 
-def fetch_feedback(host, user, password, database, days): # DAG
+def fetch_feedback(which_db,days): # DAG
+
+    host = os.getenv('DATABASE_HOST_' + str(which_db))
+    user = os.getenv('DATABASE_USERNAME_' + str(which_db))
+    passwd = os.getenv('DATABASE_PASSWORD_' + str(which_db))
+    db = os.getenv('DATABASE')
+
     # Établir la connexion à la base de données
-    db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
-    cursor = db.cursor()
+        # Connexion à la base de données
+    connection = MySQLdb.connect(
+        host=host,
+        user=user,
+        passwd=passwd,
+        db=db,
+        autocommit=True,
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={"ca": "/etc/ssl/cert.pem"}
+    )    
+    cursor = connection.cursor()
 
     # Obtenir la date la plus récente des notes dans la base de données
     cursor.execute("SELECT MAX(created) FROM user_feedback")
@@ -330,7 +345,7 @@ def fetch_feedback(host, user, password, database, days): # DAG
     comments = [item[1] for item in cursor.fetchall()]
     # Fermeture du curseur et de la connexion à la base de données
     cursor.close()
-    db.close()
+    connection.close()
 
     return {'ratings': ratings, 'comments': comments}
 
@@ -455,8 +470,16 @@ def get_wordcount(which="A"):
 
 
     # Connexion à la base de données
-    conn = MySQLdb.connect(host=host, user=user, passwd=passwd, db=db)
-    cursor = conn.cursor()
+    connection = MySQLdb.connect(
+        host=host,
+        user=user,
+        passwd=passwd,
+        db=db,
+        autocommit=True,
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={"ca": "/etc/ssl/cert.pem"}
+    )    
+    cursor = connection.cursor()
 
     # Requête SQL pour récupérer les 50 derniers commentaires
     sql = "SELECT user_comments FROM user_feedback WHERE user_rating BETWEEN 1 AND 3 LIMIT 150"
@@ -483,7 +506,7 @@ def get_wordcount(which="A"):
     wordcloud_data = [{'name': word, 'value': freq} for word, freq in top_words_freq]
     # Fermeture de la connexion à la base de données
     cursor.close()
-    conn.close()
+    connection.close()
 
     return wordcloud_data
 
