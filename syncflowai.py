@@ -8,6 +8,7 @@ import random
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
+from scipy.stats import mannwhitneyu
 import datetime
 from datetime import datetime, timedelta
 from nltk.corpus import stopwords
@@ -445,7 +446,7 @@ def store_feedback(feedback):
             cursor.close()
             connection.close()
 
-def get_wordcount(which="a"):
+def get_wordcount(which="A"):
     # Paramètres de connexion à la base de données
     host = os.getenv('DATABASE_HOST_' + str(which))
     user = os.getenv('DATABASE_USERNAME_' + str(which))
@@ -475,21 +476,53 @@ def get_wordcount(which="a"):
 
     word_freq = Counter(words)
 
-    # Générer un nom de fichier timestampé
-    timestamp = datetime.datetime.today().strftime("%Y-%m-%d")
-    filename = f'wordcloud_data_{timestamp}.json'
-
     # Utilisation de most_common pour récupérer les 20 termes les plus fréquents
     top_words_freq = word_freq.most_common(40)
 
     # Conversion des données en format JSON
     wordcloud_data = [{'name': word, 'value': freq} for word, freq in top_words_freq]
-
     # Fermeture de la connexion à la base de données
     cursor.close()
     conn.close()
 
     return wordcloud_data
+
+def get_stats():
+    DATABASE = os.getenv('DATABASE')
+    DATABASE_HOST_A = os.getenv("DATABASE_HOST_A")
+    DATABASE_PASSWORD_A = os.getenv("DATABASE_PASSWORD_A")
+    DATABASE_USERNAME_A = os.getenv("DATABASE_USERNAME_A")
+
+    DATABASE_HOST_B = os.getenv("DATABASE_HOST_B")
+    DATABASE_PASSWORD_B = os.getenv("DATABASE_PASSWORD_B")
+    DATABASE_USERNAME_B = os.getenv("DATABASE_USERNAME_B")
+
+    # Utilisation de la fonction pour récupérer les notes des deux bases de données
+    feedback_a = syncflowai.fetch_feedback(DATABASE_HOST_A, DATABASE_USERNAME_A, DATABASE_PASSWORD_A, DATABASE, 15)
+    feedback_b = syncflowai.fetch_feedback(DATABASE_HOST_B, DATABASE_USERNAME_B, DATABASE_PASSWORD_B, DATABASE, 15)
+
+    ratings_a = feedback_a['ratings']
+    ratings_b = feedback_b['ratings']
+
+    # Effectuer le test de Mann-Whitney U
+    u_stat, p_value = mannwhitneyu(ratings_a, ratings_b)
+    alpha = 0.05
+
+    dico = {#"wordcount": wordcount,
+            'u_stat': u_stat,
+            'p_value': p_value,
+            "mean_A": np.mean(ratings_a), 
+            "mean_B" : np.mean(ratings_b),
+            "significance_threshold": alpha}
+
+    # Interprétation
+    if p_value > alpha:
+        dico['significance'] = "Pas de différence significative"
+    else:
+        dico['significance'] = "Différence significative"
+
+    return dico
+
 
 def write_feedback(mission_id, user_comment, rating, prompt_version='unknown'):
 

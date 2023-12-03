@@ -3,15 +3,17 @@ from scipy.stats import mannwhitneyu
 import numpy as np
 import syncflowai
 import json
+import os
 # Informations de connexion pour les bases de données A et B
-DATABASE = "syncflow"
-DATABASE_HOST_A = "aws.connect.psdb.cloud"
-DATABASE_PASSWORD_A = "pscale_pw_LhQn0Ezma4br1IEIAWpIuOpW3F6130vbI3PHayY4e5x"
-DATABASE_USERNAME_A = "3c1lfs5yya7lrubhzbpi"
+def get_mannwhitneyu(which):
+DATABASE = os.getenv('DATABASE')
+DATABASE_HOST_A = os.getenv("DATABASE_HOST_A")
+DATABASE_PASSWORD_A = os.getenv("DATABASE_PASSWORD_A")
+DATABASE_USERNAME_A = os.getenv("DATABASE_USERNAME_A")
 
-DATABASE_HOST_B = "aws.connect.psdb.cloud"
-DATABASE_PASSWORD_B = "pscale_pw_YEti6llWKsSaYC78C0I7vsrr4Qb0UwwPZw3MhYMDhNj"
-DATABASE_USERNAME_B = "ced19wlcwfmfbt3wb7u2"
+DATABASE_HOST_B = os.getenv("DATABASE_HOST_B")
+DATABASE_PASSWORD_B = os.getenv("DATABASE_PASSWORD_B")
+DATABASE_USERNAME_B = os.getenv("DATABASE_USERNAME_B")
 
 # Utilisation de la fonction pour récupérer les notes des deux bases de données
 feedback_a = syncflowai.fetch_feedback(DATABASE_HOST_A, DATABASE_USERNAME_A, DATABASE_PASSWORD_A, DATABASE, 15)
