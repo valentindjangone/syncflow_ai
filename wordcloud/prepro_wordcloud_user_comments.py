@@ -11,9 +11,9 @@ load_dotenv()
 os.chdir('./wordcloud/data/')
 
 # Paramètres de connexion à la base de données
-host = os.getenv('DATABASE_HOST')
-user = os.getenv('DATABASE_USERNAME')
-passwd = os.getenv('DATABASE_PASSWORD')
+host = os.getenv('DATABASE_HOST_A')
+user = os.getenv('DATABASE_USERNAME_A')
+passwd = os.getenv('DATABASE_PASSWORD_A')
 db = os.getenv('DATABASE')
 
 
@@ -22,7 +22,7 @@ conn = MySQLdb.connect(host=host, user=user, passwd=passwd, db=db)
 cursor = conn.cursor()
 
 # Requête SQL pour récupérer les 50 derniers commentaires
-sql = "SELECT user_comments FROM user_feedback WHERE user_rating BETWEEN 1 AND 3 LIMIT 50"
+sql = "SELECT user_comments FROM user_feedback WHERE user_rating BETWEEN 1 AND 3 LIMIT 150"
 cursor.execute(sql)
 
 # Récupération des données

@@ -9,6 +9,12 @@ import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
 import datetime
+from datetime import datetime, timedelta
+from nltk.corpus import stopwords
+from collections import Counter
+import re
+
+
 load_dotenv()
 
 #
@@ -167,7 +173,7 @@ def update_mission_details(mission_id, mission_update):
 
 def generate_mission(n=10, model="gpt-4-1106-preview", temperature=0.85):
 
-    skills =[
+    skills = [
         "Python", "JavaScript", "Java", "C++", "C#", "Ruby", "Go", "Rust", "Kotlin", "Swift", "TypeScript",
         "React", "Angular", "Vue.js", "Ember.js",
         "Django", "Flask", "Node.js", "Express.js", "Spring Boot", "Ruby on Rails",
@@ -206,9 +212,13 @@ def generate_mission(n=10, model="gpt-4-1106-preview", temperature=0.85):
 
     return text_response
 
-def generate_feedback(mission, raw_response, feedback_date, rating_limits, model="gpt-4-1106-preview", temperature=1.2):
+def generate_feedback(mission, raw_response, feedback_date, rating, rating_limits=False, rating_auto=False, model="gpt-4-1106-preview", temperature=1.2):
     
-    rating = np.random.randint(rating_limits[0], rating_limits[1]+1)
+    if rating_auto and rating_limits:
+        rating = np.random.randint(rating_limits[0], rating_limits[1]+1)
+    else:
+        rating=rating
+
     messages = [
         {
         "role" : "system",
@@ -266,9 +276,9 @@ def generate_feedback(mission, raw_response, feedback_date, rating_limits, model
     return feedback_dict
 
 def connect_to_db():
-    db_host = os.getenv("DATABASE_HOST")
-    db_user = os.getenv("DATABASE_USERNAME")
-    db_password = os.getenv("DATABASE_PASSWORD")
+    db_host = os.getenv("DATABASE_HOST_A")
+    db_user = os.getenv("DATABASE_USERNAME_A")
+    db_password = os.getenv("DATABASE_PASSWORD_A")
     db_name = os.getenv("DATABASE")
 
     if not all([db_host, db_user, db_password, db_name]):
@@ -293,6 +303,35 @@ def fetch_data(query):
         data = pd.DataFrame(list(cur.fetchall()), columns=columns)
         cur.close()
     return data
+
+
+def fetch_feedback(host, user, password, database, days): # DAG
+    # Établir la connexion à la base de données
+    db = MySQLdb.connect(host=host, user=user, passwd=password, db=database)
+    cursor = db.cursor()
+
+    # Obtenir la date la plus récente des notes dans la base de données
+    cursor.execute("SELECT MAX(created) FROM user_feedback")
+    most_recent_date = cursor.fetchone()[0]
+    if most_recent_date is None:
+        return np.array([])  # Retourner un tableau vide s'il n'y a pas de notes
+
+    # Calculer la date de début pour la période de 15 jours
+    start_date = most_recent_date - timedelta(days=days)
+
+    # Requête SQL pour récupérer les notes sur la période spécifiée
+    query = """
+    SELECT user_rating, user_comments FROM user_feedback
+    WHERE created BETWEEN %s AND %s
+    """
+    cursor.execute(query, (start_date, most_recent_date))
+    ratings = [item[0] for item in cursor.fetchall()]
+    comments = [item[1] for item in cursor.fetchall()]
+    # Fermeture du curseur et de la connexion à la base de données
+    cursor.close()
+    db.close()
+
+    return {'ratings': ratings, 'comments': comments}
 
 def store_processed_mission(mission_dict):
     connection = connect_to_db()
@@ -406,6 +445,51 @@ def store_feedback(feedback):
             cursor.close()
             connection.close()
 
+def get_wordcount(which="a"):
+    # Paramètres de connexion à la base de données
+    host = os.getenv('DATABASE_HOST_' + str(which))
+    user = os.getenv('DATABASE_USERNAME_' + str(which))
+    passwd = os.getenv('DATABASE_PASSWORD_' + str(which))
+    db = os.getenv('DATABASE')
+
+
+    # Connexion à la base de données
+    conn = MySQLdb.connect(host=host, user=user, passwd=passwd, db=db)
+    cursor = conn.cursor()
+
+    # Requête SQL pour récupérer les 50 derniers commentaires
+    sql = "SELECT user_comments FROM user_feedback WHERE user_rating BETWEEN 1 AND 3 LIMIT 150"
+    cursor.execute(sql)
+
+    # Récupération des données
+    comments = [item[0] for item in cursor.fetchall()]
+
+    # Liste des stop words
+    stop_words = set(stopwords.words('english') + ['ai'])
+
+    # Nettoyage et comptage des mots
+    words = []
+    for comment in comments:
+        comment = re.sub(r'\W+', ' ', comment.lower())
+        words.extend([word for word in comment.split() if word not in stop_words])
+
+    word_freq = Counter(words)
+
+    # Générer un nom de fichier timestampé
+    timestamp = datetime.datetime.today().strftime("%Y-%m-%d")
+    filename = f'wordcloud_data_{timestamp}.json'
+
+    # Utilisation de most_common pour récupérer les 20 termes les plus fréquents
+    top_words_freq = word_freq.most_common(40)
+
+    # Conversion des données en format JSON
+    wordcloud_data = [{'name': word, 'value': freq} for word, freq in top_words_freq]
+
+    # Fermeture de la connexion à la base de données
+    cursor.close()
+    conn.close()
+
+    return wordcloud_data
 
 def write_feedback(mission_id, user_comment, rating, prompt_version='unknown'):
 
