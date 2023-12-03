@@ -90,7 +90,7 @@ async def wordcloud_data(which_db: str = Query(enum=["A", "B"])):
 async def stats_data(days):
     try:
         # Appel de la fonction get_wordcount et récupération des données
-        data = syncflowai.get_stats()
+        data = syncflowai.get_stats(days)
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
