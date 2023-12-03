@@ -85,6 +85,16 @@ async def wordcloud_data():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
+
+@api.get("/stats")
+async def stats_data():
+    try:
+        # Appel de la fonction get_wordcount et récupération des données
+        data = syncflowai.get_stats()
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # Exécuter l'application si ce fichier est le point d'entrée principal
 if __name__ == "__main__":
     uvicorn.run(api, host="0.0.0.0", port=8000)

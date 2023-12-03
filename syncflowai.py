@@ -498,8 +498,8 @@ def get_stats():
     DATABASE_USERNAME_B = os.getenv("DATABASE_USERNAME_B")
 
     # Utilisation de la fonction pour récupérer les notes des deux bases de données
-    feedback_a = syncflowai.fetch_feedback(DATABASE_HOST_A, DATABASE_USERNAME_A, DATABASE_PASSWORD_A, DATABASE, 15)
-    feedback_b = syncflowai.fetch_feedback(DATABASE_HOST_B, DATABASE_USERNAME_B, DATABASE_PASSWORD_B, DATABASE, 15)
+    feedback_a = fetch_feedback(DATABASE_HOST_A, DATABASE_USERNAME_A, DATABASE_PASSWORD_A, DATABASE, 15)
+    feedback_b = fetch_feedback(DATABASE_HOST_B, DATABASE_USERNAME_B, DATABASE_PASSWORD_B, DATABASE, 15)
 
     ratings_a = feedback_a['ratings']
     ratings_b = feedback_b['ratings']
