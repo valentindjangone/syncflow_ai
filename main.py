@@ -87,7 +87,7 @@ async def wordcloud_data(which_db: str = Query(enum=["A", "B"])):
     
 
 @api.get("/stats")
-async def stats_data(days):
+async def stats_data(days : int):
     try:
         # Appel de la fonction get_wordcount et récupération des données
         data = syncflowai.get_stats(days)
