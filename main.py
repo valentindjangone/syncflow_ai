@@ -1,11 +1,12 @@
-from fastapi import FastAPI, HTTPException, Path
+from fastapi import FastAPI, HTTPException, Path, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, UUID1
-from typing import Optional
+from typing import Optional, List, Dict
 import uvicorn
 import syncflowai
-api = FastAPI()
 
+
+api = FastAPI()
 
 origins = [
     "http://localhost:3000",
@@ -71,6 +72,26 @@ async def submit_feedback(feedback_input: FeedbackInput):
             feedback_input.prompt_version
         )
         return {"message": "Feedback submitted successfully", "feedback_id": feedback_response["id"]}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Définition du nouveau point de terminaison
+@api.get("/wordcloud-data")
+async def wordcloud_data(which_db: str = Query(enum=["A", "B"])):
+    try:
+        # Appel de la fonction get_wordcount et récupération des données
+        data = syncflowai.get_wordcount(which_db)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@api.get("/stats")
+async def stats_data(days : int):
+    try:
+        # Appel de la fonction get_wordcount et récupération des données
+        data = syncflowai.get_stats(days)
+        return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

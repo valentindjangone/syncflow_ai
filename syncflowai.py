@@ -8,6 +8,15 @@ import random
 import numpy as np
 import pandas as pd
 from dotenv import load_dotenv
+from scipy.stats import mannwhitneyu
+import datetime
+from datetime import datetime, timedelta
+from nltk.corpus import stopwords
+from collections import Counter
+import re
+import nltk
+
+
 load_dotenv()
 
 #
@@ -166,7 +175,7 @@ def update_mission_details(mission_id, mission_update):
 
 def generate_mission(n=10, model="gpt-4-1106-preview", temperature=0.85):
 
-    skills =[
+    skills = [
         "Python", "JavaScript", "Java", "C++", "C#", "Ruby", "Go", "Rust", "Kotlin", "Swift", "TypeScript",
         "React", "Angular", "Vue.js", "Ember.js",
         "Django", "Flask", "Node.js", "Express.js", "Spring Boot", "Ruby on Rails",
@@ -205,9 +214,13 @@ def generate_mission(n=10, model="gpt-4-1106-preview", temperature=0.85):
 
     return text_response
 
-def generate_feedback(mission, raw_response, feedback_date, rating_limits, model="gpt-4-1106-preview", temperature=1.2):
+def generate_feedback(mission, raw_response, feedback_date, rating, rating_limits=False, rating_auto=False, model="gpt-4-1106-preview", temperature=1.2):
     
-    rating = np.random.randint(rating_limits[0], rating_limits[1]+1)
+    if rating_auto and rating_limits:
+        rating = np.random.randint(rating_limits[0], rating_limits[1]+1)
+    else:
+        rating=rating
+
     messages = [
         {
         "role" : "system",
@@ -280,7 +293,7 @@ def connect_to_db():
         db=db_name,
         autocommit=True,
         ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/ssl/cert.pem"}
+        ssl={"ca": "/etc/secrets/cert.pem"}
     )
     return connection
 
@@ -292,6 +305,50 @@ def fetch_data(query):
         data = pd.DataFrame(list(cur.fetchall()), columns=columns)
         cur.close()
     return data
+
+
+def fetch_feedback(days, which_db): # DAG
+
+    host = os.getenv('DATABASE_HOST_' + str(which_db))
+    user = os.getenv('DATABASE_USERNAME_' + str(which_db))
+    passwd = os.getenv('DATABASE_PASSWORD_' + str(which_db))
+    db = os.getenv('DATABASE')
+
+    # Établir la connexion à la base de données
+        # Connexion à la base de données
+    connection = MySQLdb.connect(
+        host=host,
+        user=user,
+        passwd=passwd,
+        db=db,
+        autocommit=True,
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={"ca": "/etc/secrets/cert.pem"}
+    )    
+    cursor = connection.cursor()
+
+    # Obtenir la date la plus récente des notes dans la base de données
+    cursor.execute("SELECT MAX(created) FROM user_feedback")
+    most_recent_date = cursor.fetchone()[0]
+    if most_recent_date is None:
+        return np.array([])  # Retourner un tableau vide s'il n'y a pas de notes
+
+    # Calculer la date de début pour la période de 15 jours
+    start_date = most_recent_date - timedelta(days=days)
+
+    # Requête SQL pour récupérer les notes sur la période spécifiée
+    query = """
+    SELECT user_rating, user_comments FROM user_feedback
+    WHERE created BETWEEN %s AND %s
+    """
+    cursor.execute(query, (start_date, most_recent_date))
+    ratings = [item[0] for item in cursor.fetchall()]
+    comments = [item[1] for item in cursor.fetchall()]
+    # Fermeture du curseur et de la connexion à la base de données
+    cursor.close()
+    connection.close()
+
+    return {'ratings': ratings, 'comments': comments, "start_date": start_date, "end_date": most_recent_date}
 
 def store_processed_mission(mission_dict):
     connection = connect_to_db()
@@ -377,7 +434,7 @@ def store_feedback(feedback):
 
     try:
         cursor = connection.cursor()
-
+        
         # Préparation et exécution de la requête SQL
         insert_query = """
             INSERT INTO user_feedback (
@@ -404,3 +461,137 @@ def store_feedback(feedback):
         if connection and connection.open:
             cursor.close()
             connection.close()
+
+def get_wordcount(which_db):
+    # Paramètres de connexion à la base de données
+    host = os.getenv('DATABASE_HOST_' + str(which_db))
+    user = os.getenv('DATABASE_USERNAME_' + str(which_db))
+    passwd = os.getenv('DATABASE_PASSWORD_' + str(which_db))
+    db = os.getenv('DATABASE')
+
+
+    # Connexion à la base de données
+    connection = MySQLdb.connect(
+        host=host,
+        user=user,
+        passwd=passwd,
+        db=db,
+        autocommit=True,
+        ssl_mode="VERIFY_IDENTITY",
+        ssl={"ca": "/etc/secrets/cert.pem"}
+    )
+    cursor = connection.cursor()
+
+    # Requête SQL pour récupérer les 50 derniers commentaires
+    sql = "SELECT user_comments FROM user_feedback WHERE user_rating BETWEEN 1 AND 3 LIMIT 150"
+    cursor.execute(sql)
+
+    # Récupération des données
+    comments = [item[0] for item in cursor.fetchall()]
+    nltk.download('stopwords')
+
+    # Liste des stop words
+    stop_words = set(stopwords.words('english') + ['ai'])
+
+    # Nettoyage et comptage des mots
+    words = []
+    for comment in comments:
+        comment = re.sub(r'\W+', ' ', comment.lower())
+        words.extend([word for word in comment.split() if word not in stop_words])
+
+    word_freq = Counter(words)
+
+    # Utilisation de most_common pour récupérer les 20 termes les plus fréquents
+    top_words_freq = word_freq.most_common(40)
+
+    # Conversion des données en format JSON
+    wordcloud_data = [{'name': word, 'value': freq} for word, freq in top_words_freq]
+    # Fermeture de la connexion à la base de données
+    cursor.close()
+    connection.close()
+
+    return wordcloud_data
+
+def get_stats(days):
+
+    # Utilisation de la fonction pour récupérer les notes des deux bases de données
+    feedback_a = fetch_feedback(days, which_db="A")
+    feedback_b = fetch_feedback(days, which_db="B")
+
+    ratings_a = feedback_a['ratings']
+    ratings_b = feedback_b['ratings']
+
+    start_date = feedback_a['start_date']
+    end_date = feedback_a['end_date']
+    # Effectuer le test de Mann-Whitney U
+    u_stat, p_value = mannwhitneyu(ratings_a, ratings_b)
+    alpha = 0.05
+
+    dico = {#"wordcount": wordcount,
+            'start_date': start_date,
+            'end_date': end_date,
+            'n_values_A': len(ratings_a),
+            'n_values_B': len(ratings_b),
+            'U_stat': u_stat,
+            'p_value': p_value,
+            "mean_A": np.mean(ratings_a), 
+            "mean_B" : np.mean(ratings_b),
+            "significance_threshold": alpha}
+
+    # Interprétation
+    if p_value > alpha:
+        dico['significance'] = "Pas de différence significative"
+    else:
+        dico['significance'] = "Différence significative"
+
+    return dico
+
+
+def write_feedback(mission_id, user_comment, rating, prompt_version='unknown'):
+
+    generated_id = {'id' : uuid.uuid1()}
+
+    feedback = dict(generated_id)
+    feedback['id'] = uuid.uuid1()
+    feedback['user_rating'] = int(rating)
+    feedback['user_comments'] = str(user_comment)
+    feedback['mission_id'] = mission_id
+    feedback['prompt_version'] = prompt_version
+    feedback['created'] = datetime.datetime.today()
+    connection = connect_to_db()
+
+    try:
+        cursor = connection.cursor()
+
+        # Préparation et exécution de la requête SQL
+        insert_query = """
+            INSERT INTO user_feedback (
+                id, user_rating, user_comments, mission_id, created, prompt_version
+            ) VALUES (
+                %s, %s, %s, %s, %s, %s
+            )
+            """
+
+        cursor.execute(insert_query, (
+            feedback.get("id"),
+            feedback.get("user_rating"),
+            feedback.get("user_comments"),
+            feedback.get('mission_id'),
+            feedback.get('created'),
+            feedback.get('prompt_version')
+        ))
+
+    except MySQLdb.Error as err:
+        raise err
+
+    finally:
+        # Fermeture de la connexion à la base de données
+        if connection and connection.open:
+            cursor.close()
+            connection.close()
+            
+    # Après insertion dans la base de données
+    feedback_id = feedback.get("id")
+    
+    # Retourner l'ID de feedback ou l'objet de feedback
+    return {'id': feedback_id}

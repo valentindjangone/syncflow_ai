@@ -6,7 +6,6 @@ WORKDIR /app
 
 # Copier les fichiers nécessaires dans le conteneur
 COPY ./requirements.txt /app/requirements.txt
-COPY certs/cert.pem /etc/ssl/cert.pem
 
 # Installer les dépendances
 RUN pip install --no-cache-dir -r requirements.txt
