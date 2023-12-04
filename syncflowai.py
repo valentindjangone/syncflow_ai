@@ -434,7 +434,7 @@ def store_feedback(feedback):
 
     try:
         cursor = connection.cursor()
-
+        
         # Préparation et exécution de la requête SQL
         insert_query = """
             INSERT INTO user_feedback (
@@ -530,9 +530,9 @@ def get_stats(days):
     dico = {#"wordcount": wordcount,
             'start_date': start_date,
             'end_date': end_date,
-            'n_values_a': len(ratings_a),
-            'n_values_b': len(ratings_b),
-            'u_stat': u_stat,
+            'n_values_A': len(ratings_a),
+            'n_values_B': len(ratings_b),
+            'U_stat': u_stat,
             'p_value': p_value,
             "mean_A": np.mean(ratings_a), 
             "mean_B" : np.mean(ratings_b),
