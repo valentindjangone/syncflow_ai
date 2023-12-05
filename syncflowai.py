@@ -48,7 +48,7 @@ def extract_mission_details(mission):
                 },
                 "detail" : {
                 "type" : "string",
-                "description" : "An advanced technical reformulation of the mission, highlight impoortant details with the html tags <b> </b and make it readable with <br> </br>" 
+                "description" : "An advanced technical reformulation of the mission. Don't add vague emphasis on the quality demanded." #"highlight important details with the html tags <b> </b and make it readable with <br> </br>" 
                 },
                 "roles": {
                 "type": "array",
@@ -58,7 +58,7 @@ def extract_mission_details(mission):
                     "properties": {
                     "role_name": {
                         "type": "string",
-                        "description": "emoji related to the role + name of the role"
+                        "description": "name of the role" #"emoji related to the role + name of the role"
                     },
                     "skills_required": {
                         "type": "array",
