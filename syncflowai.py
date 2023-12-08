@@ -19,7 +19,7 @@ import nltk
 
 load_dotenv()
 
-#
+# TODO : https://www.youtube.com/watch?v=yj-wSRJwrrc
 def extract_mission_details(mission):
     messages = [{
             "role": "system",
@@ -48,7 +48,7 @@ def extract_mission_details(mission):
                 },
                 "detail" : {
                 "type" : "string",
-                "description" : "An advanced technical reformulation of the mission, highlight impoortant details with the html tags <b> </b and make it readable with <br> </br>" 
+                "description" : "An advanced technical reformulation of the mission, highlight important details with the html tags <b> </b and make it readable with <br> </br>. Give maximum details and be as precise as you can on the tech to use and the process" 
                 },
                 "roles": {
                 "type": "array",
@@ -69,7 +69,7 @@ def extract_mission_details(mission):
                     },
                     "reason" : {
                         "type" : "string",
-                        "description" : "The reason why this role is required"
+                        "description" : "The reason why this role is required, give maximum details and be as precise as you can on the tech to use and the process."
                         
                     }
                     },
