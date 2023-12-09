@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import UUID1
 from models.mission_model import Mission, MissionUpdate
 from services.mission_service import extract_mission_details
-from services.db_service import connect_to_db, store_processed_mission, store_raw_response, update_mission_details
+from services.db_service import store_processed_mission, store_raw_response, update_mission_details
 
 router = APIRouter(prefix='/mission')
 
