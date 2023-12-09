@@ -1,9 +1,8 @@
 import openai
 import json
 import uuid
-import os
 
-async def extract_mission_details(mission):
+def extract_mission_details(mission):
                             
     messages = [{
             "role": "system",
