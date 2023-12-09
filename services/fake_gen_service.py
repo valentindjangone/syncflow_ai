@@ -2,6 +2,7 @@ import openai
 import json
 import numpy as np
 import random
+import uuid
 
 def generate_feedback(mission, raw_response, feedback_date, rating, rating_limits=False, rating_auto=False, model="gpt-4-1106-preview", temperature=1.2):
     
