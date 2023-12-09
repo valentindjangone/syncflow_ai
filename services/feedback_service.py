@@ -2,7 +2,7 @@ import os
 import MySQLdb 
 import numpy as np
 import uuid
-from db_service import connect_to_db
+from services.db_service import connect_to_db
 from datetime import datetime, timedelta
 
 
