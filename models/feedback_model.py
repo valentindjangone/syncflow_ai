@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, UUID1
 
 class FeedbackInput(BaseModel):
     mission_id: UUID1
