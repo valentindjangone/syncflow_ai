@@ -1,4 +1,4 @@
-from db_service import fetch_feedback
+from services.db_service import fetch_feedback
 import numpy as np
 from scipy.stats import mannwhitneyu
 import os
