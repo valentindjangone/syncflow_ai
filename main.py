@@ -2,9 +2,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from routes import mission_route, feedback_route, data_analysis_route
+import openai
+import os
 
+
+openai.api_key = os.getenv('OPENAI_API_KEY')
+print(os.environ)
 api = FastAPI()
-
 api.add_middleware(
     CORSMiddleware,
     allow_origins="http://localhost:3000",

@@ -9,8 +9,7 @@ import os
 router = APIRouter(prefix='/mission')
 
 @router.post("/extract_details")
-async def extract_mission_details_route(mission: Mission, include_raw: bool = False, api_key=os.getenv('OPENAI_API_KEY')):
-    openai.api_key=api_key
+async def extract_mission_details_route(mission: Mission, include_raw: bool = False):
     try:
         processed_mission, raw_response = await extract_mission_details(mission.mission)
         await store_processed_mission(processed_mission)

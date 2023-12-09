@@ -3,10 +3,8 @@ import json
 import uuid
 import os
 
-def extract_mission_details(mission, api_key = os.getenv('OPENAI_API_KEY')):
+async def extract_mission_details(mission):
                             
-    openai.api_key = api_key
-
     messages = [{
             "role": "system",
             "content": """
