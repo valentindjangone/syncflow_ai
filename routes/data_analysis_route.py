@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Query
 from services.data_analysis_service import get_wordcount, get_stats
 
-router = APIRouter('/data-analysis', tags=["Data Analysis"])
+router = APIRouter(prefix ='/data-analysis', tags=["Data Analysis"])
 
 
 @router.get("/wordcloud-data")

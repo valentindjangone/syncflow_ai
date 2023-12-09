@@ -5,7 +5,6 @@ import uuid
 from services.db_service import connect_to_db
 from datetime import datetime, timedelta
 
-
 def fetch_feedback(days, which_db): # DAG
 
     host = os.getenv('DATABASE_HOST_' + str(which_db))
