@@ -3,24 +3,36 @@ import MySQLdb
 import pandas as pd
 import json
 from fastapi import HTTPException
+from dotenv import load_dotenv
 
 def connect_to_db():
+    load_dotenv()
     db_host = os.getenv("DATABASE_HOST_A")
     db_user = os.getenv("DATABASE_USERNAME_A")
     db_password = os.getenv("DATABASE_PASSWORD_A")
     db_name = os.getenv("DATABASE")
-
+    print(db_host, db_user, db_password, db_name)
     if not all([db_host, db_user, db_password, db_name]):
         raise Exception("Les informations de connexion à la base de données sont incomplètes.")
-
-    connection = MySQLdb.connect(
-        host=db_host,
-        user=db_user,
-        passwd=db_password,
-        db=db_name,
-        autocommit=True,
-        ssl_mode="VERIFY_IDENTITY",
-        ssl={"ca": "/etc/secrets/cert.pem"}
+    if 'valentin' and 'apple' in str(os.environb):
+        connection = MySQLdb.connect(
+            host=db_host,
+            user=db_user,
+            passwd=db_password,
+            db=db_name,
+            autocommit=True,
+            ssl_mode="VERIFY_IDENTITY",
+            ssl={"ca": "/etc/ssl/cert.pem"}
+        )
+    else:
+        connection = MySQLdb.connect(
+            host=db_host,
+            user=db_user,
+            passwd=db_password,
+            db=db_name,
+            autocommit=True,
+            ssl_mode="VERIFY_IDENTITY",
+            ssl={"ca": "/etc/secrets/cert.pem"}
     )
     return connection
 
