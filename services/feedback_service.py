@@ -4,6 +4,7 @@ import numpy as np
 import uuid
 from services.db_service import connect_to_db
 from datetime import timedelta
+import datetime
 
 
 def fetch_feedback(days, which_db): # DAG
