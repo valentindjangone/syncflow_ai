@@ -14,7 +14,7 @@ openai.api_key = os.getenv('OPENAI_API_KEY')
 api = FastAPI()
 api.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://localhost:3000", "https://dework.fly.dev"],
+    allow_origins=["https://localhost:3000", "https://dework.fly.dev/create/mission"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
