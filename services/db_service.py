@@ -11,7 +11,6 @@ def connect_to_db():
     db_user = os.getenv("DATABASE_USERNAME_A")
     db_password = os.getenv("DATABASE_PASSWORD_A")
     db_name = os.getenv("DATABASE")
-    print(db_host, db_user, db_password, db_name)
     if not all([db_host, db_user, db_password, db_name]):
         raise Exception("Les informations de connexion à la base de données sont incomplètes.")
     if 'valentin' and 'apple' in str(os.environb):

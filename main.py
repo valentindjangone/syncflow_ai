@@ -2,14 +2,16 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from routes import mission_route, feedback_route, data_analysis_route
-import openai
+from openai import OpenAI
+import instructor
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
-openai.api_key = os.getenv('OPENAI_API_KEY')
+client = OpenAI()
+instructor.patch(client)
 
 api = FastAPI()
 api.add_middleware(

@@ -1,6 +1,11 @@
-import openai
+from openai import OpenAI
+import instructor
 import json
 import uuid
+
+client = OpenAI()
+
+instructor.patch(client)
 
 def extract_mission_details(mission):
                             
@@ -116,3 +121,5 @@ def extract_mission_details(mission):
     mission_dict['metadata_id'] = raw_response['id']
 
     return mission_dict, raw_response
+
+
