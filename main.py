@@ -9,7 +9,7 @@ import syncflowai
 api = FastAPI()
 
 origins = [
-    "http://localhost:3000",
+    "http://localhost:3000", "https://dework.fly.dev/create/mission"
 ]
 
 
