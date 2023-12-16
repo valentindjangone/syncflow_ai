@@ -13,15 +13,11 @@ client = OpenAI()
 instructor.patch(client)
 
 api = FastAPI()
-<<<<<<< HEAD
 
 origins = [
     "http://localhost:3000", "https://dework.fly.dev/create/mission"
 ]
 
-
-=======
->>>>>>> stream
 api.add_middleware(
     CORSMiddleware,
     allow_origins=["https://localhost:3000", "https://dework.fly.dev/create/mission"],
