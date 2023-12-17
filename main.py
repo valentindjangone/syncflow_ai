@@ -15,7 +15,7 @@ instructor.patch(client)
 api = FastAPI()
 
 origins = [
-    "http://localhost:3000", "https://dework.fly.dev/create/mission"
+    "*"# http://localhost:3000", "https://dework.fly.dev/create/mission"
 ]
 
 api.add_middleware(
