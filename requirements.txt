@@ -8,7 +8,4 @@ pandas
 seaborn
 nltk
 scipy
-<<<<<<< HEAD
 instructor
-=======
->>>>>>> 9632665f9faabbf0e9a4eed41d34d3d9e2bd6af9

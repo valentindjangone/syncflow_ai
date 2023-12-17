@@ -1,4 +1,5 @@
-from openai import OpenAI
+from openai import AsyncOpenAI,OpenAI
+import openai
 import instructor
 import json
 import uuid
