@@ -1,4 +1,4 @@
-from openai import OpenAI
+from openai import AsyncOpenAI,OpenAI
 import openai
 import instructor
 import json
@@ -7,7 +7,7 @@ from models.mission_model import ExtractedMission
 from dotenv import load_dotenv
 load_dotenv()
 
-client = OpenAI()
+client = AsyncOpenAI()
 
 instructor.patch(client)
 # ++++++++++++++++++++++++++++++++++ LEGACY CODE +++++++++++++++++++++++++++++++++++++
