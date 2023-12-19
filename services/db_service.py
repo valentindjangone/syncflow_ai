@@ -7,9 +7,9 @@ from dotenv import load_dotenv
 
 def connect_to_db():
     load_dotenv()
-    db_host = os.getenv("DATABASE_HOST_A")
-    db_user = os.getenv("DATABASE_USERNAME_A")
-    db_password = os.getenv("DATABASE_PASSWORD_A")
+    db_host = os.getenv("DATABASE_HOST_B")
+    db_user = os.getenv("DATABASE_USERNAME_B")
+    db_password = os.getenv("DATABASE_PASSWORD_B")
     db_name = os.getenv("DATABASE")
     if not all([db_host, db_user, db_password, db_name]):
         raise Exception("Les informations de connexion à la base de données sont incomplètes.")
