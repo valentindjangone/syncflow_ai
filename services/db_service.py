@@ -181,7 +181,7 @@ def update_mission_details(mission_id, mission_update):
         # Ajoutez d'autres champs ici si nécessaire
 
         update_query += ", ".join(update_parts)
-        update_query += " WHERE id = %s"
+        update_query += "WHERE id = %s"
         params.append(str(mission_id))
 
         # Exécution de la requête
