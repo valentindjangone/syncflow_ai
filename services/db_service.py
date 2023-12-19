@@ -180,8 +180,12 @@ def update_mission_details(mission_id, mission_update):
 
         # Ajoutez d'autres champs ici si nécessaire
 
+        # Vérifiez si update_parts n'est pas vide
+        if not update_parts:
+            raise ValueError("Aucun champ à mettre à jour n'a été spécifié")
+
         update_query += ", ".join(update_parts)
-        update_query += "WHERE id = %s"
+        update_query += " WHERE id = %s"
         params.append(str(mission_id))
 
         # Exécution de la requête
