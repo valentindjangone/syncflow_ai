@@ -130,6 +130,10 @@ instructor.patch(client)
 
 
 def extract_mission_details(mission: str, model = "gpt-4-1106-preview") -> ExtractedMission:
+
+    if mission == "test":
+        model="gpt-3.5-turbo"
+
     response = client.chat.completions.create(
         model=model,
         response_model=ExtractedMission,
