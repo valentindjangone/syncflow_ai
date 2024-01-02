@@ -10,7 +10,7 @@ load_dotenv()
 client = OpenAI()
 
 instructor.patch(client)
-# ++++++++++++++++++++++++++++++++++ LEGACY CODE +++++++++++++++++++++++++++++++++++++
+# ++++++++++++++++++++++++++++++++++ OLD CODE +++++++++++++++++++++++++++++++++++++
 # def extract_mission_details(mission):
                             
 #     messages = [{
@@ -126,7 +126,7 @@ instructor.patch(client)
 
 #     return mission_dict, raw_response
 
-# ++++++++++++++++++++++++++++++++++ LEGACY CODE +++++++++++++++++++++++++++++++++++++
+# ++++++++++++++++++++++++++++++++++ OLD CODE +++++++++++++++++++++++++++++++++++++
 
 
 def extract_mission_details(mission: str, model = "gpt-4-1106-preview") -> ExtractedMission:
