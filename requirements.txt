@@ -9,3 +9,4 @@ seaborn
 nltk
 scipy
 instructor
+fastapi_auth_middleware
