@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException
 from models.feedback_model import FeedbackInput
 from services.feedback_service import write_feedback
 
-router = APIRouter(prefix = '/feedback')
+router = APIRouter(prefix = '/feedback', tags=["Feedback"])
 
 @router.post('/')    
 async def submit_feedback(feedback_input: FeedbackInput):

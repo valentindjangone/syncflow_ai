@@ -4,7 +4,7 @@ from models.mission_model import Mission, MissionUpdate
 from services.mission_service import extract_mission_details
 from services.db_service import store_processed_mission, store_raw_response, update_mission_details
 
-router = APIRouter(prefix='/mission')
+router = APIRouter(prefix='/mission', tags=["Mission creation"])
 
 @router.post("/extract_details")
 async def extract_mission_details_route(mission: Mission, include_raw: bool = False):
