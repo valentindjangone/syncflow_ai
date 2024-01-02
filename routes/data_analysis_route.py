@@ -49,3 +49,4 @@ async def stats_data( days: int, token_data: TokenData = Depends(verify_token)):
         return data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
