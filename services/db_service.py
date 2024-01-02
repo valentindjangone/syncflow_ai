@@ -188,6 +188,7 @@ def update_mission_details(mission_id, mission_update):
         update_query += " WHERE id = %s"
         params.append(str(mission_id))
 
+
         # Exécution de la requête
         cursor.execute(update_query, params)
         conn.commit()
