@@ -43,7 +43,7 @@ async def wordcloud_data(token_data: TokenData = Depends(verify_token), which_db
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/stats")
-async def stats_data(token_data: TokenData = Depends(verify_token), days: int):
+async def stats_data( days: int, token_data: TokenData = Depends(verify_token)):
     try:
         data = get_stats(days)
         return data
