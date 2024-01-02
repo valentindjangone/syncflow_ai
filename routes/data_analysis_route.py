@@ -7,7 +7,7 @@ router = APIRouter(prefix='/data-analysis', tags=["Data Analysis"])
 
 # Configuration de l'authentification
 auth_middleware = AuthMiddleware(
-    secret_key="VotreCleSecrete",  # Utilisez votre clé secrète pour les jetons JWT
+    secret_key="password",  # Utilisez votre clé secrète pour les jetons JWT
     algorithm="HS256",  # Algorithme utilisé pour les jetons JWT
     auth_header_prefix="Bearer"  # Préfixe utilisé dans le header d'authentification
 )
