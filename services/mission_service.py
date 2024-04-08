@@ -7,9 +7,8 @@ from models.mission_model import ExtractedMission
 from dotenv import load_dotenv
 load_dotenv()
 
-client = OpenAI()
+client = instructor.from_openai(OpenAI())
 
-instructor.patch(client)
 # ++++++++++++++++++++++++++++++++++ OLD CODE +++++++++++++++++++++++++++++++++++++
 # def extract_mission_details(mission):
                             
