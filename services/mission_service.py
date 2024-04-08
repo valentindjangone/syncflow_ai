@@ -156,9 +156,4 @@ def extract_mission_details(mission: str, model = "gpt-4-1106-preview") -> Extra
     raw_response['cost'] = {'prompt' : raw_response['prompt_cost'], 'completion' : raw_response['completion_cost'], 'total' : raw_response['prompt_cost'] + raw_response['completion_cost']}
     raw_response['id'] = uuid.uuid1()
 
-    mission_dict = json.loads(response._raw_response.model_dump()['choices'][0]['message']['function_call']['arguments'])
-    mission_dict['id'] = uuid.uuid1()
-    mission_dict['created'] = raw_response['created']
-    mission_dict['metadata_id'] = raw_response['id']
-
-    return mission_dict, raw_response
+    return raw_response
